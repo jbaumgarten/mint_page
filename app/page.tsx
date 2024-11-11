@@ -12,6 +12,8 @@ import { publicKey } from "@metaplex-foundation/umi";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { walletAdapterIdentity } from "@metaplex-foundation/umi-signer-wallet-adapters";
 
+import { useWallet } from "@solana/wallet-adapter-react";
+
 import { clusterApiUrl } from "@solana/web3.js";
 
 import { Button } from "@/components/ui/button";
@@ -39,13 +41,14 @@ const quicknodeEndpoint =
   process.env.NEXT_PUBLIC_RPC || clusterApiUrl("devnet");
 
 const MintPage = () => {
-  //const wallet = useWallet();
+  const wallet = useWallet();
   const umi = useMemo(
     () =>
       createUmi(quicknodeEndpoint)
         .use(mplCandyMachine())
-        .use(mplTokenMetadata()),
-    [],
+        .use(mplTokenMetadata())
+        .use(walletAdapterIdentity(wallet)),
+    [wallet],
   );
 
   const canMint = () => {

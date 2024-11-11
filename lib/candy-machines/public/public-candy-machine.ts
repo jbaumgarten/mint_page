@@ -60,6 +60,7 @@ export const publicCandyMachine = async (umi: Umi) => {
       title: "Mint successful!",
       description: `Transaction ID: ${txid}`,
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     toast({
       title: "Mint failed!",
