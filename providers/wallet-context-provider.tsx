@@ -18,9 +18,14 @@ import {
   TrustWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
 
+import { clusterApiUrl } from "@solana/web3.js";
+
 type WalletContextProviderProps = {
   children: ReactNode;
 };
+
+const quicknodeEndpoint =
+  process.env.NEXT_PUBLIC_RPC || clusterApiUrl("devnet");
 
 export default function WalletContextProvider({
   children,
@@ -31,11 +36,7 @@ export default function WalletContextProvider({
   //const { autoConnect } = useWallet();
 
   // We can also provide a custom RPC endpoint.
-  const endpoint = useMemo(
-    () =>
-      "https://mainnet.helius-rpc.com/?api-key=a45ca7f0-c986-47b3-9459-c01310d348b6",
-    [],
-  );
+  const endpoint = useMemo(() => quicknodeEndpoint, []);
 
   // Define wallets
   const wallets = useMemo(
