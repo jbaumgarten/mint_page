@@ -45,13 +45,7 @@ const MintPage = () => {
       createUmi(quicknodeEndpoint)
         .use(mplCandyMachine())
         .use(mplTokenMetadata()),
-    [
-      mplCandyMachine,
-      walletAdapterIdentity,
-      mplTokenMetadata,
-      quicknodeEndpoint,
-      createUmi,
-    ],
+    [],
   );
 
   const canMint = () => {

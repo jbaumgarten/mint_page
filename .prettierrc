@@ -9,6 +9,7 @@
     "^@metaplex-foundation/umi-bundle-defaults",
     "^@metaplex-foundation/umi-signer-wallet-adapters",
     "^@radix-ui/react-slot",
+    "^@radix-ui/react-toast",
     "^@solana/wallet-adapter-base",
     "^@solana/wallet-adapter-react",
     "^@solana/wallet-adapter-react-ui",
