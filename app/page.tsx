@@ -1,101 +1,123 @@
+"use client";
+
 import Image from "next/image";
 
-export default function Home() {
+import React, { useCallback, useMemo } from "react";
+
+import { mplCandyMachine } from "@metaplex-foundation/mpl-candy-machine";
+
+import { mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
+
+import { publicKey } from "@metaplex-foundation/umi";
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+import { walletAdapterIdentity } from "@metaplex-foundation/umi-signer-wallet-adapters";
+
+import { clusterApiUrl } from "@solana/web3.js";
+
+import { Button } from "@/components/ui/button";
+import WalletConnection from "@/components/wallet-connection/wallet-connection";
+
+import { goldRoleCandyMachine } from "@/lib/candy-machines/gold-role/gold-role-candy-machine";
+import { holderCandyMachine } from "@/lib/candy-machines/holder/holder-candy-machine";
+import { publicCandyMachine } from "@/lib/candy-machines/public/public-candy-machine";
+
+type CandyMachine = "GoldRole" | "Holder" | "Public";
+
+type MintOption = {
+  type: string;
+  price: string;
+  candyMachine: CandyMachine;
+};
+
+const mintOptions: MintOption[] = [
+  { type: "Gold role", price: "1 free mint", candyMachine: "GoldRole" },
+  { type: "Holder", price: "0,25 sol", candyMachine: "Holder" },
+  { type: "Public", price: "0,4 sol", candyMachine: "Public" },
+];
+
+const quicknodeEndpoint =
+  process.env.NEXT_PUBLIC_RPC || clusterApiUrl("devnet");
+
+const MintPage = () => {
+  //const wallet = useWallet();
+  const umi = useMemo(
+    () =>
+      createUmi(quicknodeEndpoint)
+        .use(mplCandyMachine())
+        .use(mplTokenMetadata()),
+    [
+      mplCandyMachine,
+      walletAdapterIdentity,
+      mplTokenMetadata,
+      quicknodeEndpoint,
+      createUmi,
+    ],
+  );
+
+  const canMint = () => {
+    if (!publicKey) {
+      console.log("error", "Wallet not connected!");
+      return false;
+    }
+
+    return true;
+  };
+
+  const onClickMint = useCallback(
+    async (candyMachine: CandyMachine) => {
+      if (!canMint()) return;
+
+      switch (candyMachine) {
+        case "GoldRole":
+          await goldRoleCandyMachine(umi);
+          break;
+        case "Holder":
+          await holderCandyMachine(umi);
+          break;
+        case "Public":
+          await publicCandyMachine(umi);
+          break;
+      }
+    },
+    [umi],
+  );
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+    <div className="min-h-screen space-y-10 bg-zinc-50 p-4">
+      <div className="mb-8 flex justify-end">
+        <WalletConnection />
+      </div>
+
+      <div className="mb-8 flex justify-center">
         <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
+          src="/assets/banner.png"
+          alt="Banner"
+          width={600}
           height={38}
           priority
         />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+      </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      <div className="mx-auto space-y-4 lg:w-1/3">
+        {mintOptions.map(({ type, price, candyMachine }, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between rounded-lg border border-zinc-200 p-4"
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            <span className="text-lg">
+              {type} : {price}
+            </span>
+            <Button
+              className="bg-zinc-600 px-8 text-white hover:bg-zinc-700"
+              onClick={() => onClickMint(candyMachine)}
+            >
+              MINT
+            </Button>
+          </div>
+        ))}
+      </div>
     </div>
   );
-}
+};
+
+export default MintPage;
